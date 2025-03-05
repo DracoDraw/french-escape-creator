@@ -29,7 +29,7 @@ export const trips: Trip[] = [
     region: "Île-de-France",
     totalCost: "3 900 €",
     duration: "5 jours",
-    imageSrc: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop",
+    imageSrc: "/lovable-uploads/7de25135-bfa5-433a-8f93-0d1d23ab1932.png",
     days: [
       {
         activities: [
@@ -84,7 +84,7 @@ export const trips: Trip[] = [
     region: "Provence-Alpes-Côte d'Azur",
     totalCost: "2 700 €",
     duration: "5 jours",
-    imageSrc: "https://images.unsplash.com/photo-1525685210123-d0e7e3ce9181?q=80&w=2070&auto=format&fit=crop",
+    imageSrc: "/lovable-uploads/e89690d3-5de4-4c14-aad0-fb82aae405ca.png",
     days: [
       {
         activities: [
@@ -142,7 +142,7 @@ export const trips: Trip[] = [
     region: "Bretagne",
     totalCost: "1 670 €",
     duration: "5 jours",
-    imageSrc: "https://images.unsplash.com/photo-1591221585761-5abb71b17ae3?q=80&w=2070&auto=format&fit=crop",
+    imageSrc: "/lovable-uploads/92be7876-4738-4234-88e6-41cda4923b04.png",
     days: [
       {
         activities: [
@@ -198,7 +198,7 @@ export const trips: Trip[] = [
     region: "Nouvelle-Aquitaine & Bourgogne",
     totalCost: "2 340 €",
     duration: "5 jours",
-    imageSrc: "https://images.unsplash.com/photo-1609951651556-5334e2706168?q=80&w=2074&auto=format&fit=crop",
+    imageSrc: "/lovable-uploads/c172b5b3-3397-4b86-bc09-bc72dd8a33ad.png",
     days: [
       {
         activities: [

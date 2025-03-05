@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="font-serif text-2xl mb-4">Voyage France</h3>
+            <h3 className="font-serif text-2xl mb-4">La France for-me-dable</h3>
             <p className="mb-4 opacity-80 text-sm">
               Voyagez avec élégance et découvrez les trésors cachés de la France grâce à nos itinéraires soigneusement élaborés.
             </p>
@@ -103,14 +103,14 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} />
-                <span className="text-sm opacity-80">contact@voyagefrance.com</span>
+                <span className="text-sm opacity-80">contact@lafranceformedable.com</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-white/20 mt-10 pt-6 text-center text-sm opacity-70">
-          <p>&copy; {currentYear} Voyage France. Tous droits réservés.</p>
+          <p>&copy; {currentYear} La France for-me-dable. Tous droits réservés.</p>
         </div>
       </div>
     </footer>

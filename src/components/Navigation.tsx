@@ -39,7 +39,7 @@ const Navigation = () => {
           to="/" 
           className="font-serif text-2xl md:text-3xl text-navy transition-all hover:opacity-80"
         >
-          Voyage France
+          La France for-me-dable
         </Link>
 
         {/* Desktop Navigation */}
