@@ -14,6 +14,8 @@ interface FormData {
   foodPreferences: string;
   places: string;
   language: string;
+  email: string;
+  travelers: string;
 }
 
 const TripGenerator = () => {
@@ -29,7 +31,9 @@ const TripGenerator = () => {
     previousTrip: '',
     foodPreferences: '',
     places: '',
-    language: 'Français'
+    language: 'Français',
+    email: '',
+    travelers: '1',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -46,7 +50,7 @@ const TripGenerator = () => {
       setIsLoading(false);
       toast({
         title: "Voyage personnalisé en cours de création",
-        description: "Nous préparons votre itinéraire personnalisé. Vous recevrez un email avec tous les détails sous peu.",
+        description: `Nous préparons votre itinéraire personnalisé pour ${formData.travelers} voyageur(s). Vous recevrez un email à ${formData.email} avec tous les détails sous peu.`,
       });
     }, 2000);
   };
@@ -61,8 +65,44 @@ const TripGenerator = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="votre@email.com"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="travelers" className="block text-sm font-medium text-gray-700">
+              Nombre de voyageurs <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="travelers"
+              name="travelers"
+              value={formData.travelers}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
+              required
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                <option key={num} value={num.toString()}>
+                  {num} {num === 1 ? 'voyageur' : 'voyageurs'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="departure" className="block text-sm font-medium text-gray-700">
-              Date de départ
+              Date de départ <span className="text-red-500">*</span>
             </label>
             <input
               id="departure"
@@ -77,7 +117,7 @@ const TripGenerator = () => {
 
           <div className="space-y-2">
             <label htmlFor="return" className="block text-sm font-medium text-gray-700">
-              Date de retour
+              Date de retour <span className="text-red-500">*</span>
             </label>
             <input
               id="return"
@@ -92,7 +132,7 @@ const TripGenerator = () => {
 
           <div className="space-y-2">
             <label htmlFor="budget" className="block text-sm font-medium text-gray-700">
-              Budget (en euros)
+              Budget (en euros) <span className="text-red-500">*</span>
             </label>
             <input
               id="budget"
@@ -108,23 +148,24 @@ const TripGenerator = () => {
 
           <div className="space-y-2">
             <label htmlFor="origin" className="block text-sm font-medium text-gray-700">
-              Pays d'origine
+              Ville de départ <span className="text-red-500">*</span>
             </label>
             <input
               id="origin"
               name="origin"
               type="text"
-              placeholder="Ex: Belgique"
+              placeholder="Ex: Bruxelles, Belgique"
               value={formData.origin}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
               required
             />
+            <p className="text-xs text-gray-500">Pour nous aider à choisir le meilleur aéroport de départ</p>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="tripType" className="block text-sm font-medium text-gray-700">
-              Type de voyage
+              Type de voyage <span className="text-red-500">*</span>
             </label>
             <select
               id="tripType"
@@ -145,7 +186,7 @@ const TripGenerator = () => {
 
           <div className="space-y-2">
             <label htmlFor="places" className="block text-sm font-medium text-gray-700">
-              Lieux à visiter
+              Lieux à visiter <span className="text-red-500">*</span>
             </label>
             <input
               id="places"
@@ -185,6 +226,21 @@ const TripGenerator = () => {
             rows={2}
             placeholder="Ex: Végétarien, allergies, restaurants gastronomiques..."
             value={formData.foodPreferences}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="previousTrip" className="block text-sm font-medium text-gray-700">
+            Voyages précédents en France (optionnel)
+          </label>
+          <textarea
+            id="previousTrip"
+            name="previousTrip"
+            rows={2}
+            placeholder="Ex: Paris en 2019, Côte d'Azur en 2021..."
+            value={formData.previousTrip}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
           />
