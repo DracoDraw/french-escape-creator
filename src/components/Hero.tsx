@@ -39,10 +39,10 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const scrollToVoyages = () => {
-    const voyagesSection = document.getElementById('voyages');
-    if (voyagesSection) {
-      voyagesSection.scrollIntoView({ behavior: 'smooth' });
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -70,27 +70,26 @@ const Hero = () => {
           Voyagez avec élégance et découvrez les trésors cachés de la France, des rues romantiques de Paris aux vignobles ensoleillés de la Bourgogne.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
-          <a 
-            href="#voyages" 
+          <button 
             className="px-8 py-3 bg-white text-navy font-medium rounded hover:bg-white/90 transition-all"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToVoyages();
-            }}
+            onClick={() => scrollToSection('voyages')}
           >
             Nos Voyages
-          </a>
-          <a 
-            href="#generateur" 
+          </button>
+          <button 
             className="px-8 py-3 bg-transparent border border-white text-white font-medium rounded hover:bg-white/10 transition-all"
+            onClick={() => scrollToSection('generateur')}
           >
             Créer Votre Voyage
-          </a>
+          </button>
         </div>
       </div>
       
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce text-white">
+      <div 
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce text-white cursor-pointer"
+        onClick={() => scrollToSection('voyages')}
+      >
         <ChevronDown size={32} />
       </div>
     </div>

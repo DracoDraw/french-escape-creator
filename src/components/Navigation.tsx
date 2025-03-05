@@ -21,11 +21,30 @@ const Navigation = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  const scrollToSection = (sectionId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Close the menu if it's open
+    setIsMobileMenuOpen(false);
+    
+    // Handle home navigation
+    if (sectionId === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    // Handle other section navigation
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const navItems = [
-    { name: 'Accueil', path: '/' },
-    { name: 'Nos Voyages', path: '/#voyages' },
-    { name: 'Créer Votre Voyage', path: '/#generateur' },
-    { name: 'Contact', path: '/#contact' },
+    { name: 'Accueil', path: '/', sectionId: 'home' },
+    { name: 'Nos Voyages', path: '/#voyages', sectionId: 'voyages' },
+    { name: 'Créer Votre Voyage', path: '/#generateur', sectionId: 'generateur' },
+    { name: 'Contact', path: '/#contact', sectionId: 'contact' },
   ];
 
   return (
@@ -38,6 +57,7 @@ const Navigation = () => {
         <Link 
           to="/" 
           className="font-serif text-2xl md:text-3xl text-navy transition-all hover:opacity-80"
+          onClick={(e) => scrollToSection('home', e)}
         >
           La France for-me-dable
         </Link>
@@ -45,15 +65,16 @@ const Navigation = () => {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
-            <Link
+            <a
               key={item.name}
-              to={item.path}
+              href={item.path}
               className={`text-navy hover:text-navy/70 transition-all text-sm font-medium ${
                 location.pathname + location.hash === item.path ? 'border-b-2 border-navy' : ''
               }`}
+              onClick={(e) => scrollToSection(item.sectionId, e)}
             >
               {item.name}
-            </Link>
+            </a>
           ))}
         </div>
 
@@ -71,15 +92,16 @@ const Navigation = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md shadow-md py-4 px-6 flex flex-col space-y-4 animate-fade-in">
           {navItems.map((item) => (
-            <Link
+            <a
               key={item.name}
-              to={item.path}
+              href={item.path}
               className={`text-navy hover:text-navy/70 transition-all text-base font-medium py-2 ${
                 location.pathname + location.hash === item.path ? 'border-l-4 border-navy pl-2' : ''
               }`}
+              onClick={(e) => scrollToSection(item.sectionId, e)}
             >
               {item.name}
-            </Link>
+            </a>
           ))}
         </div>
       )}
