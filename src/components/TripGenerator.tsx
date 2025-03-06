@@ -1,56 +1,34 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
-import { generateTrip } from '@/services/dataTourismeService';
+import { generateTrip, TripParams, TripResult } from '../services/tripService';
+import { sendTripEmail } from '@/services/emailService';
+import { useNavigate } from 'react-router-dom';
 
-interface FormData {
-  departure: string;
-  return: string;
-  activities: string;
-  budget: string;
-  origin: string;
-  tripType: string;
-  previousTrip: string;
-  foodPreferences: string;
-  places: string;
-  language: string;
-  email: string;
-  travelers: string;
-}
-
-interface TripResult {
-  success: boolean;
-  tripData?: {
-    destination: string;
-    duration: number;
-    startDate: string;
-    endDate: string;
-    budget: string;
-    tripType: string;
-    itinerary: Record<string, any[]>;
-  };
-  message?: string;
-}
-
-const TripGenerator = () => {
+const TripGenerator: React.FC = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [tripResult, setTripResult] = useState<TripResult | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    departure: '',
-    return: '',
-    activities: '',
-    budget: '',
-    origin: '',
-    tripType: '',
-    previousTrip: '',
-    foodPreferences: '',
-    places: '',
-    language: 'Français',
-    email: '',
-    travelers: '1',
+  const [tripResult, setTripResult] = useState<TripResult>({
+    success: false,
+    tripData: undefined
   });
+  const [formData, setFormData] = useState<TripParams>({
+    location: '',
+    duration: '',
+    tripType: '',
+    budget: '',
+    destination: '',
+    startDate: '',
+    endDate: '',
+    email: '',
+    travelers: '',
+    activities: '',
+    foodPreferences: '',
+    previousTrip: '',
+    stayInCity: 'true'
+  });
+  const [generatedTrip, setGeneratedTrip] = useState<string>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -60,22 +38,50 @@ const TripGenerator = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTripResult(null);
+    setTripResult({
+      success: false,
+      tripData: undefined
+    });
     
     try {
-      // Appel au service pour générer le voyage
       const result = await generateTrip({
-        places: formData.places,
-        activities: formData.activities,
+        location: formData.location,
+        duration: formData.duration,
         tripType: formData.tripType,
         budget: formData.budget,
-        departure: formData.departure,
-        return: formData.return
+        destination: formData.destination,
+        startDate: formData.startDate,
+        endDate: formData.endDate
       });
       
       setTripResult(result);
       
       if (result.success) {
+        // Le texte généré par Mistral est dans result.tripData.itinerary
+        console.log('Itinéraire généré:', result.tripData.itinerary);
+        
+        // Pour l'afficher dans ton interface
+        setGeneratedTrip(result.tripData.itinerary);
+
+        // Add logging to see what we're trying to send
+        console.log('Preparing email with:', {
+          to: formData.email,
+          subject: `Your Trip to ${formData.destination}`,
+          html: `<h1>Your Trip to ${formData.destination}</h1>
+          <p>From: ${formData.startDate}</p>
+          <p>To: ${formData.endDate}</p>
+          <pre>${JSON.stringify(result.tripData, null, 2)}</pre>`
+        });
+
+        await sendTripEmail(
+          formData.email,
+          `Your Trip to ${formData.destination}`,
+          `<h1>Your Trip to ${formData.destination}</h1>
+          <p>From: ${formData.startDate}</p>
+          <p>To: ${formData.endDate}</p>
+          <pre>${JSON.stringify(result.tripData, null, 2)}</pre>`
+        );
+
         toast({
           title: "Voyage personnalisé créé",
           description: `Nous avons créé votre itinéraire personnalisé pour ${formData.travelers} voyageur(s). Vous recevrez un email à ${formData.email} avec tous les détails sous peu.`,
@@ -88,7 +94,7 @@ const TripGenerator = () => {
         });
       }
     } catch (error) {
-      console.error('Erreur lors de la création du voyage:', error);
+      console.error('Erreur:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la création de votre voyage, veuillez réessayer.",
@@ -106,7 +112,7 @@ const TripGenerator = () => {
         Répondez à quelques questions et notre assistant de voyage expert vous créera un itinéraire personnalisé en France.
       </p>
 
-      {!tripResult ? (
+      {!tripResult.success ? (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -146,14 +152,15 @@ const TripGenerator = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="departure" className="block text-sm font-medium text-gray-700">
-                Date de départ <span className="text-red-500">*</span>
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                Destination <span className="text-red-500">*</span>
               </label>
               <input
-                id="departure"
-                name="departure"
-                type="date"
-                value={formData.departure}
+                id="location"
+                name="location"
+                type="text"
+                placeholder="Ex: Paris, Nice, Bordeaux"
+                value={formData.location}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
                 required
@@ -161,14 +168,17 @@ const TripGenerator = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="return" className="block text-sm font-medium text-gray-700">
-                Date de retour <span className="text-red-500">*</span>
+              <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                Durée (en jours) <span className="text-red-500">*</span>
               </label>
               <input
-                id="return"
-                name="return"
-                type="date"
-                value={formData.return}
+                id="duration"
+                name="duration"
+                type="number"
+                min="1"
+                max="14"
+                placeholder="Ex: 5"
+                value={formData.duration}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
                 required
@@ -192,15 +202,15 @@ const TripGenerator = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="origin" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="destination" className="block text-sm font-medium text-gray-700">
                 Ville de départ <span className="text-red-500">*</span>
               </label>
               <input
-                id="origin"
-                name="origin"
+                id="destination"
+                name="destination"
                 type="text"
-                placeholder="Ex: Bruxelles, Belgique"
-                value={formData.origin}
+                placeholder="Ex: Paris, Bordeaux"
+                value={formData.destination}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
                 required
@@ -230,15 +240,47 @@ const TripGenerator = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="places" className="block text-sm font-medium text-gray-700">
-                Lieux à visiter <span className="text-red-500">*</span>
+              <label htmlFor="stayInCity" className="block text-sm font-medium text-gray-700">
+                Périmètre de visite <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="stayInCity"
+                name="stayInCity"
+                value={formData.stayInCity}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
+                required
+              >
+                <option value="true">Rester dans la ville principale</option>
+                <option value="false">Explorer la région environnante</option>
+              </select>
+              <p className="text-xs text-gray-500">Choisissez si vous souhaitez rester dans la ville principale ou explorer les alentours</p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                Date de départ <span className="text-red-500">*</span>
               </label>
               <input
-                id="places"
-                name="places"
-                type="text"
-                placeholder="Ex: Paris, Bordeaux"
-                value={formData.places}
+                id="startDate"
+                name="startDate"
+                type="date"
+                value={formData.startDate}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                Date de retour <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="endDate"
+                name="endDate"
+                type="date"
+                value={formData.endDate}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
                 required
@@ -291,87 +333,88 @@ const TripGenerator = () => {
             />
           </div>
 
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-center">
             <button
               type="submit"
               disabled={isLoading}
-              className="px-8 py-3 bg-navy text-white font-medium rounded-md hover:bg-navy/90 transition-all flex items-center gap-2"
+              className={`inline-flex items-center px-6 py-3 rounded-md text-white bg-navy hover:bg-navy/90 transition-colors ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               {isLoading ? (
                 <>
-                  <Loader2 size={20} className="animate-spin" />
-                  Création en cours...
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Génération en cours...
                 </>
               ) : (
                 <>
-                  <Send size={20} />
-                  Créer mon voyage
+                  <Send className="w-5 h-5 mr-2" />
+                  Générer mon voyage
                 </>
               )}
             </button>
           </div>
         </form>
-      ) : (
-        <div className="bg-cream p-6 rounded-lg shadow">
-          {tripResult.success ? (
-            <>
-              <h4 className="font-serif text-2xl text-navy mb-4">Votre voyage personnalisé</h4>
-              <div className="space-y-4">
-                <div className="bg-white p-4 rounded-md shadow-sm">
-                  <h5 className="font-semibold text-lg mb-2">Informations générales</h5>
-                  <ul className="space-y-2">
-                    <li><span className="font-medium">Destination:</span> {tripResult.tripData?.destination}</li>
-                    <li><span className="font-medium">Dates:</span> Du {tripResult.tripData?.startDate} au {tripResult.tripData?.endDate}</li>
-                    <li><span className="font-medium">Durée:</span> {tripResult.tripData?.duration} jours</li>
-                    <li><span className="font-medium">Budget estimé:</span> {tripResult.tripData?.budget} €</li>
-                    <li><span className="font-medium">Type de voyage:</span> {tripResult.tripData?.tripType}</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-white p-4 rounded-md shadow-sm">
-                  <h5 className="font-semibold text-lg mb-2">Itinéraire</h5>
-                  {Object.entries(tripResult.tripData?.itinerary || {}).map(([date, attractions]) => (
-                    <div key={date} className="mb-4">
-                      <h6 className="font-medium text-navy border-b pb-1 mb-2">
-                        {new Date(date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                      </h6>
-                      <ul className="space-y-2 pl-4">
-                        {(attractions as any[]).map((attraction, index) => (
-                          <li key={index} className="list-disc">
-                            <span className="font-medium">{attraction.name}</span>
-                            {attraction.address?.addressLocality && 
-                              <span className="text-sm text-gray-600"> - {attraction.address.addressLocality}</span>
-                            }
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="text-center mt-6">
-                  <p className="mb-4">Un email détaillé a été envoyé à {formData.email} avec toutes les informations pour votre voyage.</p>
-                  <button
-                    onClick={() => setTripResult(null)}
-                    className="px-6 py-2 bg-navy text-white font-medium rounded-md hover:bg-navy/90 transition-all"
-                  >
-                    Créer un nouveau voyage
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-center">
-              <h4 className="font-serif text-2xl text-navy mb-4">Oups !</h4>
-              <p className="mb-6">{tripResult.message || "Une erreur est survenue lors de la création de votre voyage."}</p>
+      ) : tripResult.success ? (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h4 className="text-2xl font-serif text-navy mb-4">Votre voyage est prêt !</h4>
+            <p className="text-gray-600 mb-6">
+              Nous avons créé un itinéraire personnalisé pour {formData.travelers} voyageur(s).
+            </p>
+            <div className="bg-sand/20 p-6 rounded-lg">
+              <h5 className="font-medium text-navy mb-2">Détails du voyage</h5>
+              <p>Destination: {tripResult.tripData.destination}</p>
+              <p>Durée: {tripResult.tripData.duration} jours</p>
+              <p>Type de voyage: {tripResult.tripData.tripType}</p>
+              <p>Budget: {tripResult.tripData.budget}€</p>
+            </div>
+            <div className="mt-6 space-y-4">
               <button
-                onClick={() => setTripResult(null)}
-                className="px-6 py-2 bg-navy text-white font-medium rounded-md hover:bg-navy/90 transition-all"
+                onClick={() => navigate('/payment')}
+                className="w-full inline-flex items-center justify-center px-6 py-3 rounded-md text-white bg-navy hover:bg-navy/90 transition-colors"
               >
-                Réessayer
+                Réserver ce voyage pour 30€
+              </button>
+              <button
+                onClick={() => {
+                  setTripResult({
+                    success: false,
+                    tripData: undefined
+                  });
+                  navigate('/generer-voyage');
+                }}
+                className="w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-white bg-gray-600 hover:bg-gray-700 transition-colors"
+              >
+                Créer un nouveau voyage
               </button>
             </div>
-          )}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{tripResult.message}</p>
+          <button
+            onClick={() => setTripResult({
+              success: false,
+              tripData: undefined
+            })}
+            className="inline-flex items-center px-4 py-2 rounded-md text-white bg-navy hover:bg-navy/90 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
+
+      {/* Affichage du résultat */}
+      {tripResult.success && tripResult.tripData && (
+        <div className="mt-6 p-4 bg-white rounded shadow">
+          <h2 className="text-xl font-bold mb-4">
+            Votre Itinéraire pour {tripResult.tripData.destination}
+          </h2>
+          <div className="whitespace-pre-wrap">
+            {tripResult.tripData.itinerary}
+          </div>
         </div>
       )}
     </div>
