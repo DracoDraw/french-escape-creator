@@ -12,9 +12,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configuration CORS plus permissive pour le débogage
+// Configuration CORS avec l'URL Vercel correcte
 app.use(cors({
-  origin: '*',
+  origin: ['https://lafrancefor-me-dable-gjz1si7sq-dracodraws-projects.vercel.app'],
   methods: ['GET', 'POST'],
   credentials: true
 }));

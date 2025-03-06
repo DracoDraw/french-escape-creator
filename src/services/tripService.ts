@@ -34,10 +34,11 @@ export interface TripResult {
 
 export async function generateTrip(params: TripParams): Promise<TripResult> {
   try {
+    const API_URL = import.meta.env.VITE_API_URL || 'https://french-escape-creator.onrender.com';
     console.log('Envoi des paramètres:', params);
-    console.log('URL de l\'API:', 'https://french-escape-creator.onrender.com/api/generate-trip');
+    console.log('URL de l\'API:', `${API_URL}/api/generate-trip`);
 
-    const response = await fetch('https://french-escape-creator.onrender.com/api/generate-trip', {
+    const response = await fetch(`${API_URL}/api/generate-trip`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
