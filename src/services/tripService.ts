@@ -11,7 +11,7 @@ export interface TripParams {
   activities?: string;
   foodPreferences?: string;
   previousTrip?: string;
-  stayInCity?: string;
+  travelScope?: 'city' | 'region';
 }
 
 export interface TripResult {
@@ -36,7 +36,7 @@ export async function generateTrip(params: TripParams): Promise<TripResult> {
   try {
     console.log('Envoi des paramètres:', params);
 
-    const response = await fetch('http://localhost:3000/api/generate-trip', {
+    const response = await fetch('https://french-escape-creator.onrender.com/api/generate-trip', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

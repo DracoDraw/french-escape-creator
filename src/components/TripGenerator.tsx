@@ -26,7 +26,7 @@ const TripGenerator: React.FC = () => {
     activities: '',
     foodPreferences: '',
     previousTrip: '',
-    stayInCity: 'true'
+    travelScope: 'city'
   });
   const [generatedTrip, setGeneratedTrip] = useState<string>('');
 
@@ -240,24 +240,6 @@ const TripGenerator: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="stayInCity" className="block text-sm font-medium text-gray-700">
-                Périmètre de visite <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="stayInCity"
-                name="stayInCity"
-                value={formData.stayInCity}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
-                required
-              >
-                <option value="true">Rester dans la ville principale</option>
-                <option value="false">Explorer la région environnante</option>
-              </select>
-              <p className="text-xs text-gray-500">Choisissez si vous souhaitez rester dans la ville principale ou explorer les alentours</p>
-            </div>
-
-            <div className="space-y-2">
               <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                 Date de départ <span className="text-red-500">*</span>
               </label>
@@ -285,6 +267,24 @@ const TripGenerator: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="travelScope" className="block text-sm font-medium text-gray-700">
+                Périmètre de voyage <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="travelScope"
+                name="travelScope"
+                value={formData.travelScope}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent"
+                required
+              >
+                <option value="city">Rester dans la même ville</option>
+                <option value="region">Explorer la région</option>
+              </select>
+              <p className="text-xs text-gray-500">Choisissez si vous souhaitez rester dans la même ville ou explorer la région</p>
             </div>
           </div>
 

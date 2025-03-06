@@ -2,11 +2,15 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const MISTRAL_API_KEY = 'NozTZhT5xL6mWa3JSRKkiHrwaTeSwWjf';
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://lafrancefor-me-dable.vercel.app'],
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Route de test pour la racine
@@ -17,7 +21,11 @@ app.get('/', (req, res) => {
 // Route pour la génération de voyage
 app.post('/api/generate-trip', async (req, res) => {
   try {
-    console.log('Requête reçue:', req.body);
+    console.log('Requête reçue:', {
+      headers: req.headers,
+      body: req.body,
+      origin: req.headers.origin
+    });
 
     const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
@@ -42,18 +50,19 @@ Voici les informations du voyage à générer :
 - Préférences alimentaires : ${req.body.foodPreferences}
 - Lieux à visiter : ${req.body.location}
 - Langue de sortie : ${req.body.language}
-- Périmètre de visite : ${req.body.stayInCity === 'true' ? 'Rester dans la ville principale' : 'Explorer la région environnante'}
+- Périmètre de voyage : ${req.body.travelScope === 'city' ? 'Rester dans la même ville' : 'Explorer la région'}
 
 IMPORTANT : Tu DOIS suivre EXACTEMENT le format de réponse demandé ci-dessous, en incluant TOUS les coûts et TOUS les transports.
 
-Règles spécifiques pour le périmètre de visite :
-${req.body.stayInCity === 'true' ? 
-`- Toutes les activités doivent être dans la ville principale
-- Les transports seront uniquement locaux (métro, bus, taxi)
-- Pas de déplacements vers d'autres villes` :
-`- Inclus des visites dans la région environnante
-- Propose des excursions d'une journée dans les villes voisines
-- Inclus les transports régionaux (train, bus, location de voiture)`}
+Si le périmètre est "city" :
+- Toutes les activités doivent être dans la même ville
+- Les transports doivent être uniquement locaux (métro, bus, taxi, marche)
+- Pas de déplacements vers d'autres villes
+
+Si le périmètre est "region" :
+- Inclus des visites dans différentes villes de la région
+- Inclus les transports entre les villes
+- Adapte le programme pour optimiser les temps de trajet
 
 Format de réponse OBLIGATOIRE :
 
