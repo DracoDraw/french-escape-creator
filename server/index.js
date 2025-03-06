@@ -6,8 +6,15 @@ const port = process.env.PORT || 3000;
 
 const MISTRAL_API_KEY = 'NozTZhT5xL6mWa3JSRKkiHrwaTeSwWjf';
 
+// Middleware de logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+// Configuration CORS plus permissive pour le débogage
 app.use(cors({
-  origin: ['https://lafrancefor-me-dable.vercel.app'],
+  origin: '*',
   methods: ['GET', 'POST'],
   credentials: true
 }));

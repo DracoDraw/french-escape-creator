@@ -35,6 +35,7 @@ export interface TripResult {
 export async function generateTrip(params: TripParams): Promise<TripResult> {
   try {
     console.log('Envoi des paramètres:', params);
+    console.log('URL de l\'API:', 'https://french-escape-creator.onrender.com/api/generate-trip');
 
     const response = await fetch('https://french-escape-creator.onrender.com/api/generate-trip', {
       method: 'POST',
@@ -43,6 +44,9 @@ export async function generateTrip(params: TripParams): Promise<TripResult> {
       },
       body: JSON.stringify(params)
     });
+
+    console.log('Statut de la réponse:', response.status);
+    console.log('Headers de la réponse:', Object.fromEntries(response.headers.entries()));
 
     const data = await response.json();
     console.log('Réponse brute du serveur:', data);
