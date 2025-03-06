@@ -6,19 +6,8 @@ const port = process.env.PORT || 3000;
 
 const MISTRAL_API_KEY = 'NozTZhT5xL6mWa3JSRKkiHrwaTeSwWjf';
 
-// Middleware de logging
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
-
-// Configuration CORS avec les URLs autorisées
 app.use(cors({
-  origin: [
-    'https://lafrancefor-me-dable-gjz1si7sq-dracodraws-projects.vercel.app',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173'
-  ],
+  origin: ['https://lafrancefor-me-dable.vercel.app'],
   methods: ['GET', 'POST'],
   credentials: true
 }));
@@ -26,21 +15,7 @@ app.use(express.json());
 
 // Route de test pour la racine
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Server is running!',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    port: port
-  });
-});
-
-// Route de test pour l'API
-app.get('/api/test', (req, res) => {
-  res.json({ 
-    status: 'ok',
-    message: 'API is working',
-    timestamp: new Date().toISOString()
-  });
+  res.json({ message: 'Server is running!' });
 });
 
 // Route pour la génération de voyage
