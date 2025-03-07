@@ -24,6 +24,23 @@ app.get('/', (req, res) => {
   res.json({ message: 'Server is running!' });
 });
 
+// Fonction pour vérifier le nombre de jours dans la réponse
+function verifyDayCount(content, expectedDays) {
+  // Vérifie le format exact "**Jour X :" où X est un nombre
+  const dayMatches = content.match(/\*\*Jour \d+ :/g);
+  if (!dayMatches) return false;
+  
+  // Vérifie que nous avons le bon nombre de jours
+  if (dayMatches.length !== expectedDays) return false;
+  
+  // Vérifie que les jours sont numérotés de 1 à expectedDays
+  const dayNumbers = dayMatches.map(day => parseInt(day.match(/\d+/)[0]));
+  const expectedNumbers = Array.from({length: expectedDays}, (_, i) => i + 1);
+  
+  // Vérifie que tous les numéros attendus sont présents
+  return expectedNumbers.every(num => dayNumbers.includes(num));
+}
+
 // Route pour la génération de voyage
 app.post('/api/generate-trip', async (req, res) => {
   try {
@@ -33,19 +50,33 @@ app.post('/api/generate-trip', async (req, res) => {
       origin: req.headers.origin
     });
 
-    const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${MISTRAL_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "mistral-tiny",
-        messages: [{
-          role: "user",
-          content: `Tu es un assistant de voyage expert spécialisé dans la création d'itinéraires personnalisés en France. Ton rôle est de générer un programme de voyage jour par jour, en fonction des réponses fournies par l'utilisateur via un formulaire.
+    let attempts = 0;
+    const maxAttempts = 3;
+    let validResponse = false;
+    let content = "";
+
+    while (!validResponse && attempts < maxAttempts) {
+      attempts++;
+      console.log(`Tentative ${attempts}/${maxAttempts}`);
+
+      const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${MISTRAL_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "mistral-medium",
+          messages: [{
+            role: "user",
+            content: `Tu es un assistant de voyage expert spécialisé dans la création d'itinéraires personnalisés en France.
+
+⚠️ DURÉE OBLIGATOIRE : ${req.body.duration} JOURS
+⚠️ SI TU NE GÉNÈRES PAS EXACTEMENT ${req.body.duration} JOURS, TA RÉPONSE SERA REJETÉE
+⚠️ COMPTE BIEN LES JOURS AVANT DE RÉPONDRE
 
 Voici les informations du voyage à générer :
+- Durée EXACTE : ${req.body.duration} jours (OBLIGATOIRE)
 - Jour de départ : ${req.body.startDate}
 - Jour de retour : ${req.body.endDate}
 - Activités souhaitées : ${req.body.activities}
@@ -58,78 +89,55 @@ Voici les informations du voyage à générer :
 - Langue de sortie : ${req.body.language}
 - Périmètre de voyage : ${req.body.travelScope === 'city' ? 'Rester dans la même ville' : 'Explorer la région'}
 
-IMPORTANT : Tu DOIS suivre EXACTEMENT le format de réponse demandé ci-dessous, en incluant TOUS les coûts et TOUS les transports.
+RÈGLES CRITIQUES À SUIVRE :
+1. ⚠️ GÉNÉRER EXACTEMENT ${req.body.duration} JOURS - C'EST NON NÉGOCIABLE
+2. ⚠️ CHAQUE JOUR DOIT AVOIR SON PROGRAMME (Jour 1 à Jour ${req.body.duration})
+3. ⚠️ LE BUDGET TOTAL DOIT ÊTRE PROCHE DE ${req.body.budget}€
+4. INCLURE TOUS LES COÛTS
 
-Si le périmètre est "city" :
-- Toutes les activités doivent être dans la même ville
-- Les transports doivent être uniquement locaux (métro, bus, taxi, marche)
-- Pas de déplacements vers d'autres villes
-
-Si le périmètre est "region" :
-- Inclus des visites dans différentes villes de la région
-- Inclus les transports entre les villes
-- Adapte le programme pour optimiser les temps de trajet
-
-Format de réponse OBLIGATOIRE :
-
-**Jour 1 : [Ville]**
-- [Heure] : [Transport] (coût : XX€)
+FORMAT DE RÉPONSE STRICT :
+${Array.from({length: req.body.duration}, (_, i) => `**Jour ${i + 1} : [Ville]**
 - [Heure] : [Activité] (coût : XX€)
-- [Heure] : [Transport] (coût : XX€)
 - [Heure] : [Activité] (coût : XX€)
-- Coût journalier : XXX€
-
-**Jour 2 : [Ville]**
-- [Heure] : [Transport] (coût : XX€)
-- [Heure] : [Activité] (coût : XX€)
-- [Heure] : [Transport] (coût : XX€)
-- [Heure] : [Activité] (coût : XX€)
-- Coût journalier : XXX€
+...`).join('\n\n')}
 
 **Détail des coûts** :
 - Transports internationaux : XXX€
 - Transports locaux : XXX€
-- Hébergement : XXX€
+- Hébergement : XXX€ (${req.body.duration} nuits)
 - Activités : XXX€
-- Repas : XXX€
+- Repas : XXX€ (${req.body.duration} jours)
 - Extras : XXX€
 
 **Budget total du voyage : XXXX€**
 
-Règles strictes à suivre :
-1. Inclus TOUJOURS les transports entre chaque activité avec leur coût
-2. Inclus TOUJOURS le coût de chaque activité
-3. Inclus TOUJOURS le coût de chaque repas
-4. Inclus TOUJOURS le coût de l'hébergement
-5. Inclus TOUJOURS les transports internationaux (aller-retour)
-6. Le budget total DOIT être inférieur ou égal à ${req.body.budget}€
-7. Chaque jour DOIT avoir un coût journalier détaillé
-8. Les coûts DOIVENT être réalistes et à jour
+⚠️ VÉRIFICATION FINALE OBLIGATOIRE :
+1. As-tu généré EXACTEMENT ${req.body.duration} jours ? [OUI/NON]
+2. As-tu numéroté les jours de 1 à ${req.body.duration} ? [OUI/NON]
+3. Le budget est-il proche de ${req.body.budget}€ ? [OUI/NON]
 
-Exemple de format correct :
-**Jour 1 : Bordeaux**
-- 09:00 : Transport depuis l'aéroport vers le centre-ville (coût : 15€)
-- 10:00 : Visite de la Place de la Bourse (coût : 0€)
-- 12:00 : Transport vers le restaurant (coût : 5€)
-- 12:30 : Déjeuner au restaurant (coût : 25€)
-- 14:00 : Transport vers le musée (coût : 5€)
-- 14:30 : Visite du Musée des Beaux-Arts (coût : 12€)
-Coût journalier : 62€
+Si une seule réponse est NON, ta réponse sera rejetée.`
+          }]
+        })
+      });
 
-Merci de générer un itinéraire détaillé en respectant EXACTEMENT ce format.`
-        }]
-      })
-    });
+      const data = await mistralResponse.json();
+      content = data.choices[0].message.content;
 
-    const data = await mistralResponse.json();
-    console.log('Réponse de Mistral:', data);
+      // Vérifie si la réponse contient le bon nombre de jours
+      validResponse = verifyDayCount(content, parseInt(req.body.duration));
 
-    if (!mistralResponse.ok) {
-      throw new Error(`Erreur API Mistral: ${mistralResponse.status} - ${JSON.stringify(data)}`);
+      if (!validResponse) {
+        console.log(`Réponse invalide (${attempts}/${maxAttempts}), nouvelle tentative...`);
+        if (attempts >= maxAttempts) {
+          throw new Error(`Impossible de générer un itinéraire avec ${req.body.duration} jours après ${maxAttempts} tentatives`);
+        }
+        continue;
+      }
     }
 
     res.json({
-      response: data.choices[0].message.content || "Aucune réponse générée"
+      response: content
     });
 
   } catch (error) {

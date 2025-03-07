@@ -18,7 +18,8 @@ const App = () => (
       <Sonner />
       <Router>
         <Routes>
-          <Route path="/" element={<TripGenerator />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/generer-voyage" element={<TripGenerator />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/voyage/:id" element={<TripDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
