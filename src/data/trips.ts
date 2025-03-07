@@ -132,7 +132,7 @@ export const trips: Trip[] = [
     region: "Provence-Alpes-Côte d'Azur",
     totalCost: "2 700 € pour 2 personnes",
     duration: "5 jours",
-    imageSrc: "https://images.unsplash.com/photo-1525685210123-d0e7e3ce9181?q=80&w=2070&auto=format&fit=crop",
+    imageSrc: "https://images.unsplash.com/photo-1503696967350-ad1874122058?q=80&w=1707&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     days: [
       {
         activities: [
@@ -318,7 +318,7 @@ export const trips: Trip[] = [
     region: "Nouvelle-Aquitaine & Bourgogne",
     totalCost: "2 340 € (pour 2 personnes)",
     duration: "5 jours",
-    imageSrc: "https://images.unsplash.com/photo-1609951651556-5334e2706168?q=80&w=2074&auto=format&fit=crop",
+    imageSrc: "https://images.unsplash.com/photo-1602491399415-e12a76b39b5f?q=80&w=1931&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     days: [
       {
         activities: [
