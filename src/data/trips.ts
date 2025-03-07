@@ -131,8 +131,8 @@ export const trips: Trip[] = [
     description: "Vivez un séjour de luxe sur la French Riviera avec ce voyage de 5 jours entre Nice, Cannes et Monaco. Profitez des plages de la Méditerranée, des activités nautiques et découvrez le glamour de la Côte d'Azur.",
     region: "Provence-Alpes-Côte d'Azur",
     totalCost: "2 700 € pour 2 personnes",
-    duration: "4 jours",
-    imageSrc: "https://images.unsplash.com/photo-1624184780143-d2690618c8c0?q=80&w=1771&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    duration: "5 jours",
+    imageSrc: "https://images.unsplash.com/photo-1525685210123-d0e7e3ce9181?q=80&w=2070&auto=format&fit=crop",
     days: [
       {
         activities: [
@@ -313,12 +313,12 @@ export const trips: Trip[] = [
   {
     id: "passion-vigneronne",
     title: "Passion Vigneronne",
-    subtitle: "Découvrez les vins de Bordeaux",
-    description: "Un voyage œnologique à travers les plus prestigieux châteaux de Bordeaux. Dégustez les meilleurs vins, visitez les caves historiques et découvrez les secrets de la viticulture française.",
-    region: "Bordeaux",
-    totalCost: "2 340 € pour 2 personnes",
+    subtitle: "Voyage œnologique",
+    description: "Découvrez les plus grands vignobles français avec ce voyage de 5 jours entre Bordeaux et la Bourgogne. Visitez des domaines prestigieux, participez à des dégustations exclusives et apprenez l'art de la vinification.",
+    region: "Nouvelle-Aquitaine & Bourgogne",
+    totalCost: "2 340 € (pour 2 personnes)",
     duration: "5 jours",
-    imageSrc: "https://images.unsplash.com/photo-1504279577054-acfeccf8fc52?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    imageSrc: "https://images.unsplash.com/photo-1609951651556-5334e2706168?q=80&w=2074&auto=format&fit=crop",
     days: [
       {
         activities: [
